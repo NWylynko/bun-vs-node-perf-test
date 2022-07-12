@@ -7,17 +7,17 @@ export default {
   port: 4000,
   async fetch(request) {
     try {
-      let data;
+      let dataPromises = []
       for (let i = 0; i < 10; i++) {
-        data = JSON.parse(
-          await readFile("../test.json", { encoding: "utf-8" })
-        );
+        dataPromises.push(parseFile);
       }
+      const data = Promise.all(dataPromises);
 
-      let rows;
+      let rowsPromises = [];
       for (let i = 0; i < 10; i++) {
-        rows = await db.query("SELECT * from test").all();
+        rowsPromises.push(readDatabase)
       }
+      const rows = Promise.all(rowsPromises);
 
       return new Response(JSON.stringify({ rows, data }), {
         headers: {
@@ -30,3 +30,14 @@ export default {
     }
   },
 };
+
+const parseFile = async () => {
+  data = JSON.parse(
+    await readFile("../test.json", { encoding: "utf-8" })
+  );
+  return data;
+}
+
+const readDatabase = () => {
+  return db.query("SELECT * from test").all();
+}

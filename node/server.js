@@ -7,17 +7,17 @@ const db = new Database("../test.db");
 http
   .createServer(async function (req, res) {
     try {
-      let data;
+      let dataPromises = []
       for (let i = 0; i < 10; i++) {
-        data = JSON.parse(
-          await readFile("../test.json", { encoding: "utf-8" })
-        );
+        dataPromises.push(parseFile);
       }
+      const data = Promise.all(dataPromises);
 
-      let rows;
+      let rowsPromises = [];
       for (let i = 0; i < 10; i++) {
-        rows = await db.prepare("SELECT * from test").get();
+        rowsPromises.push(readDatabase)
       }
+      const rows = Promise.all(rowsPromises);
 
       res.setHeader("Content-Type", "application/json");
       res.writeHead(200);
@@ -28,3 +28,14 @@ http
     }
   })
   .listen(4000);
+
+const parseFile = async () => {
+  data = JSON.parse(
+    await readFile("../test.json", { encoding: "utf-8" })
+  );
+  return data;
+}
+
+const readDatabase = () => {
+  return db.prepare("SELECT * from test").get();
+}
